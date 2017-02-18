@@ -1,0 +1,20 @@
+{
+  "name": "git-lab",
+  "version": "1.0.0",
+  "description": "gitlab tool for applying git commands to all projects in a group",
+  "bin": {
+    "git-lab": "index.js"
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Andi Neck",
+  "license": "MIT",
+  "dependencies": {
+    "es6-promise": "^4.0.5",
+    "isomorphic-fetch": "^2.2.1",
+    "shelljs": "^0.7.6",
+    "subarg": "^1.0.0"
+  }
+}
