@@ -28,7 +28,7 @@ example:
 
 example with environment variables:
 
- TOKEN=009afdg0SdfAS14250 URL=https://gitlab.myserver.com GROUP=rocket-science git-lab -- clone
+ TOKEN=009afdg0SdfAS14250 URL=https://gitlab.myserver.com GROUP=rocket-science git-lab -s -- clone
 ```
 
 ## license
