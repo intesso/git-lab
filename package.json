@@ -1,6 +1,6 @@
 {
   "name": "git-lab",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "gitlab tool for applying git commands to all projects in a group",
   "bin": {
     "git-lab": "index.js"
@@ -8,6 +8,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/intesso/git-lab.git"
   },
   "author": "Andi Neck",
   "license": "MIT",
