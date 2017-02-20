@@ -5,10 +5,30 @@
 ## install
 
 ```sh
-npm install --save git-lab
-````
+npm install -g git-lab
+```
 
 ## use
+```sh
+# cd into your desired directory for the gitlab group
+mkdir rocket-science && cd rocket-science
+
+# enter token, url and group and save it
+git-lab --token 009afdg0SdfAS14250 --url https://gitlab.myserver.com --group rocket-science  --save
+
+# list all repos within the group
+git-lab
+
+# clone all repos within the group
+git-lab -- clone
+
+# execute actions on all repos (locally)
+git-lab -- npm install
+git-lab -- mvn install
+```
+
+
+you can also use the help:
 
 ```sh
 ➜ git-lab -h

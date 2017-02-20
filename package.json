@@ -1,6 +1,6 @@
 {
   "name": "git-lab",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "gitlab tool for applying git commands to all projects in a group",
   "bin": {
     "git-lab": "index.js"
