@@ -35,7 +35,7 @@ if (args.h || args.help) {
 }
 
 let token = process.env.TOKEN || args.t || args.token || args.access_token || args['access-token'] || settings.token;
-let url = process.env.URL || args.u || args.url || settings.url;
+let url = process.env.URL || args.u || args.url || settings.url;
 let group = process.env.GROUP || args.g || args.group || settings.group;
 let debug = process.env.DEBUG || args.d || args.debug || settings.debug;
 
@@ -76,14 +76,23 @@ fetch(`${url}/api/v3/groups/${group}/projects\?private_token\=${token}&per_page=
 
 function execute(repo, command, cmdArgs) {
   if (command === 'clone') {
-    shell.exec(`git ${cmdArgs} ${repo}`);
+    output(shell.exec(`git ${cmdArgs} ${repo}`, { async: true, silent: true }));
   } else if (command) {
     var dirname = repo.split('/').pop().split('.')[0];
     var pwd = process.cwd();
     shell.cd(`${pwd}/${dirname}`);
-    shell.exec(cmdArgs);
+    output(shell.exec(cmdArgs, { async: true, silent: true }));
     shell.cd(pwd);
   } else {
     console.log(repo);
+  }
+
+  function output(child) {
+    child.stdout.on('data', function (data) {
+      console.log(`${repo}: ${data}`);
+    });
+    child.stderr.on('data', function (data) {
+      console.log(`${repo} ERR: ${data}`);
+    });
   }
 }
