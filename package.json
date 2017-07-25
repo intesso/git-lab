@@ -19,6 +19,7 @@
     "es6-promise": "^4.0.5",
     "isomorphic-fetch": "^2.2.1",
     "shelljs": "^0.7.6",
+    "split": "^1.0.0",
     "subarg": "^1.0.0"
   }
 }
