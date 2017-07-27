@@ -1,0 +1,25 @@
+{
+  "id": 28,
+  "lists": [
+    {
+      "id": 91,
+      "label": {
+        "id": 4257,
+        "name": "Ready",
+        "color": "#69D100",
+        "description": null
+      },
+      "position": 0
+    },
+    {
+      "id": 89,
+      "label": {
+        "id": 4255,
+        "name": "Doing",
+        "color": "#5CB85C",
+        "description": null
+      },
+      "position": 1
+    }
+  ]
+}
