@@ -9,6 +9,18 @@ npm install -g git-lab
 ```
 
 ## use
+
+```sh
+gl projects | grep mygroup | gl projects get issues_enabled | gl check false | gl projects set issues_enabled true
+```
+
+gl projects
+-> <group>/<project>
+
+gl projects get issues_enabled
+-> <group>/<project> true
+
+
 ```sh
 # cd into your desired directory for the gitlab group
 mkdir rocket-science && cd rocket-science
@@ -40,7 +52,6 @@ usage: git-lab {options} -- {git command} [git options]
 options:
  --token, -t gitlab acces token
  --url,   -u gitlab url, e.g: https://gitlab.myserver.com
- --group, -g gitlab group name
 
 example:
 

@@ -4,20 +4,25 @@ require('isomorphic-fetch');
 
 let fs = require('fs');
 let path = require('path');
+var defaults = require('defaults');
 var shell = require('shelljs');
 
 let args = require('subarg')(process.argv.slice(2));
-let instructions = args._;
+let settings = require('./settings.js');
+let stdin = process.stdin;
+let stdout = process.stdout;
+let c = args._;
 let cmd = args._[0];
 let cmdArgs = args._.slice(1);
 let cmdWithArgs = args._.join(' ');
 
 let debug = process.env.DEBUG || args.d || args.debug;
-let opts = Object.assign({
-  version: process.env.VERSION || args.v || args.version || 'v4',
+let opts = defaults({
+  version: process.env.VERSION || args.v || args.version || 'v3',
   token: process.env.TOKEN || args.t || args.token || args.access_token || args['access-token'] || args.private_token,
   url: process.env.URL || args.u || args.url,
-}, require('./settings.js').read());
+}, settings.load());
+let commands = require('./commands.js')(opts);
 
 if (args.h || args.help) {
   console.log('\ngitlab tool\n');
@@ -29,108 +34,53 @@ if (args.h || args.help) {
   console.log(' git-lab --token 009afdg0SdfAS14250 --url https://gitlab.myserver.com --save home\n');
   console.log(' git-lab clone\n');
   console.log('example with environment variables:\n');
-  console.log(' TOKEN=009afdg0SdfAS14250 URL=https://gitlab.myserver.com GROUP=rocket-science git-lab -s -- clone\n');
+  console.log(' TOKEN=009afdg0SdfAS14250 URL=https://gitlab.myserver.com git-lab -s -- clone\n');
   process.exit();
 }
 
 if (debug) {
   console.log('opts', opts);
   console.log(`TOKEN ${opts.token}`);
-  console.log(`URL ${url.url}`);
+  console.log(`URL ${opts.url}`);
   console.log('git-lab arguments', args);
-  console.log('command with arguments: ', cmdWithArgs);
+  console.log('commands: ', c.join(' '));
 }
 
 if (!opts.token || !opts.url) {
   console.error('must provide TOKEN, URL as environment variables');
   console.error('or provide them as arguments:  --token <token> --url <url>');
   console.error('you can also save them so that you don\'t have to provide it every thime with:  "--save" or "--save home" for storing in the home directory');
-  process.exit(-1)
+  process.exit(1)
 }
 
 if (args.s || args.save) {
-  require('./settings.js').save(args.s || args.save);
+  console.log('s', args.s, 'save', args.save, typeof save)
+  console.log('save', args.save || args.s)
+  settings.save(args.s || args.save, opts);
 }
 
-switch (cmd) {
-  case 'edit-project':
-  case 'get-boards':
-  case 'add-board':
-  case 'get-labels':
-  case 'add-label':
-  case 'get-milestones':
-  case 'add-milestone':
-    processInput(cmd, cmdArgs)
-    break;
-  case 'projects':
-    if (cmdArgs.length === 0) return commands.listProjects(cmd, cmdArgs);
-    if (cmdArgs[0] === 'get') return processInput(cmd, cmdArgs, commands.getProjectAttribute)
-    break;
-  default:
-    executeGroupCommand(cmd, cmdArgs)
-    break;
-}
+// run commands
+if (c[0] == 'projects' && c[1] === 'set') return run(commands.setProjectAttribute, c);
+if (c[0] == 'projects' && c[1] === 'get') return run(commands.getProjectAttribute, c);
+if (c[0] == 'projects') return run(commands.listProjects, c);
+if (c[0] == 'groups' && c[1] === 'set') return run(commands.setGroupAttribute, c);
+if (c[0] == 'groups' && c[1] === 'get') return run(commands.getProjectAttribute, c);
+if (c[0] == 'groups' && c[1] === 'projects') return run(commands.listProjectsForGroups, c);
+if (c[0] == 'groups') return run(commands.listGroups, c);
 
-function processInput(cmd, cmdArgs, fn) {
-  process.stdin.pipe(require('split')()).on('data', processLine)
+function run(fn, c) {
+  if (stdin.isTTY) return fn.apply(null, [c]);
+  stdin.pipe(require('split')()).on('data', processLine);
   function processLine(line) {
     if (!line.trim()) return;
-    fn.call(null, cmd, cmdArgs, line);
+    fn.apply(null, [c].concat([line.trim().split(' ')]));
   }
 }
 
-var commands = {
-  listProjects: function (cmd, cmdArgs, input) {
-    fetch(`${url}/api/${opts.version}/projects?private_token\=${token}&per_page=999`)
-      .then((projects) => {
-        projects.forEach((project) => console.log(project.path_with_namespace));
-      })
-      .catch(reason => console.log(reason))
-  },
-  getProjectAttribute: function (cmd, cmdArgs, input) {
-    let project = parse.project(input);
-    fetch(`${url}/api/${opts.version}/projects/${project.id}`)
-      .then(handleError)
-      .then((proj) => console.log(proj))
-  },
-  'get-settings': function (command, cmdArgs, project, projectId) {
-    fetch(`${url}/api/${opts.version}/projects/${projectId}`)
-      .then((proj) => console.log(proj))
-      .catch(reason => console.log(reason))
-  },
-  'get-boards': function (command, cmdArgs, project, projectId) {
-    fetch(`${url}/api/${opts.version}/projects/${projectId}/boards?private_token\=${token}`)
-      .then((boards) => {
-        boards.forEach((board) => console.log(JSON.stringify(board, null, 2)));
-      })
-      .catch(reason => console.log(reason))
-  },
-  'add-board': function (command, cmdArgs, project, projectId) {
-    var board = require('./board.json');
-    var boardId = 28;
-    console.log('projectId' + projectId)
-    fetch(`${url}/api/${opts.version}/projects/${projectId}/boards/${boardId}/lists?private_token\=${token}`, {
-      method: 'POST',
-      body: board
-    })
-      .then(board => console.log(board))
-      .catch(reason => console.log(reason))
-  },
-  'add-label': function (command, cmdArgs, project, projectId) {
-  },
-  'get-boards': function (command, cmdArgs, project, projectId) {
-  },
+
+function merge(a, b) {
 
 }
-
-let parse = {
-  project: (input) => ({
-    id: (input || '').replace(/\//g, '%2F'),
-    group: (input || '').split('/')[0],
-    project: (input || '').split('/')[1]
-  })
-}
-
 
 function executeGroupCommand(command, cmdArgs) {
   if (!group) {
@@ -173,3 +123,4 @@ function execute(repo, command, cmdArgs) {
     });
   }
 }
+
