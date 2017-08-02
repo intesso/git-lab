@@ -2,6 +2,23 @@
 
 > tool for gitlab bulk operations on every project within a group
 
+## examples
+
+
+#### create project board
+
+```sh
+# single board
+curl -H "PRIVATE-TOKEN: hDjozzh6dXKmovgdB8kQ" https://gitlab.mo-siemens.com/mygroup/myproject/boards
+
+# create boards for every project in group
+for i in $(node index groups projects justgo-node); do curl -H "PRIVATE-TOKEN: hDjozzh6dXKmovgdB8kQ" https://gitlab.mo-siemens.com/$i/boards; done
+```
+
+#### get boards
+
+node index boards
+
 ## install
 
 ```sh

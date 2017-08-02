@@ -1,6 +1,4 @@
 #!/usr/local/bin/node
-require('es6-promise').polyfill();
-require('isomorphic-fetch');
 
 let fs = require('fs');
 let path = require('path');
@@ -54,19 +52,40 @@ if (!opts.token || !opts.url) {
 }
 
 if (args.s || args.save) {
-  console.log('s', args.s, 'save', args.save, typeof save)
-  console.log('save', args.save || args.s)
   settings.save(args.s || args.save, opts);
 }
 
+// gl projects get mygroup/myproject issues_enabled
+// gl projects | grep myproject | gl projects get issues_enabled 
+
 // run commands
-if (c[0] == 'projects' && c[1] === 'set') return run(commands.setProjectAttribute, c);
-if (c[0] == 'projects' && c[1] === 'get') return run(commands.getProjectAttribute, c);
-if (c[0] == 'projects') return run(commands.listProjects, c);
-if (c[0] == 'groups' && c[1] === 'set') return run(commands.setGroupAttribute, c);
-if (c[0] == 'groups' && c[1] === 'get') return run(commands.getProjectAttribute, c);
-if (c[0] == 'groups' && c[1] === 'projects') return run(commands.listProjectsForGroups, c);
-if (c[0] == 'groups') return run(commands.listGroups, c);
+if (c[0] == 'projects' && c[1] == 'issues') return run(commands.listProjectIssues, c.slice(2)); // GET /projects/:id/issues
+if (c[0] == 'projects' && c[1] == 'get') return run(commands.getProjectAttribute, c.slice(2)); // GET /projects/:id
+if (c[0] == 'projects' && c[1] == 'set') return run(commands.setProjectAttribute, c.slice(2)); // PUT /projects/:id
+if (c[0] == 'projects') return run(commands.listProjects, c.slice(1)); // GET /projects
+if (c[0] == 'groups' && c[1] == 'projects') return run(commands.listProjectsForGroups, c.slice(2));
+if (c[0] == 'groups' && c[1] == 'issues') return run(commands.listGroupIssues, c.slice(2)); // GET /groups/:id/issues
+if (c[0] == 'groups' && c[1] == 'get') return run(commands.getGroupAttribute, c.slice(2)); // GET /groups/:id
+if (c[0] == 'groups' && c[1] == 'set') return run(commands.setGroupAttribute, c.slice(2)); // PUT /groups/:id
+if (c[0] == 'groups') return run(commands.listGroups, c.slice(1)); // GET /groups
+if (c[0] == 'boards' && c[1] == 'add') return run(commands.addProjectBoardList, c.slice(2));
+if (c[0] == 'boards') return run(commands.getProjectBoards, c.slice(1)); // GET boards
+if (c[0] == 'issues' && c[1] == 'get') return run(commands.getProjectIssue, c.slice(2)); // GET /projects/:id/issues/:issue_iid
+if (c[0] == 'issues' && c[1] == 'set') return run(commands.setProjectIssue, c.slice(2)); // PUT /projects/:id/issues/:issue_iid
+if (c[0] == 'issues') return run(commands.listIssues, c.slice(1)); // GET /issues
+
+
+// GET /projects/:id/issues
+//  -> issues => issues.forEach(issue => out(getProjectId(), issue.id, issue.iid))
+// PUT /projects/:id/issues/:issue_iid
+
+
+
+
+let orig = { a: { b: { c: 3, d: 7 } } }
+
+query = 'a.b'
+
 
 function run(fn, c) {
   if (stdin.isTTY) return fn.apply(null, [c]);
@@ -75,11 +94,6 @@ function run(fn, c) {
     if (!line.trim()) return;
     fn.apply(null, [c].concat([line.trim().split(' ')]));
   }
-}
-
-
-function merge(a, b) {
-
 }
 
 function executeGroupCommand(command, cmdArgs) {
