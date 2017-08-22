@@ -79,7 +79,29 @@ if (c[0] == 'issues') return run(commands.listIssues, c.slice(1)); // GET /issue
 //  -> issues => issues.forEach(issue => out(getProjectId(), issue.id, issue.iid))
 // PUT /projects/:id/issues/:issue_iid
 
+let app = {}
+app.use = function use (endpoint, fn) {
+  
+}
 
+
+app.use('PUT /projects/:id/issues/:issue_iid', )
+
+
+function parseRoute(route) {
+  let endpoint = route.split(' ')
+  let method = endpoint[0].toLowerCase()
+  let path = endpoint[1].split('?')
+  let pathname = path[0]
+  let query = path[1]
+  query = qs.parse(query || '')
+  let segments = pathname.split('/')
+  segments = segments.map(segment => ({
+    name: segment,
+    isParam: /^[:${].*/.test(segment)
+  }))
+  return { method, segments, query }
+}
 
 
 let orig = { a: { b: { c: 3, d: 7 } } }
